@@ -35,8 +35,12 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   dio: ^5.0.1
   flutter_bloc: ^8.0.1
-  flutter_phoenix: ^1.0.0
-  easy_localization: ^3.0.1
+  geolocator: ^9.0.2
+  geocoding: ^2.1.0
+  intl: ^0.18.1
+  get_it: ^7.6.0
+  animation_wrappers: ^3.0.0
+  badges: ^3.1.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -69,6 +73,11 @@ flutter:
     - assets/
     - assets/translations/
     - assets/bottom_navigation_bar_icons/
+    - assets/user_location_icons/
+    - assets/user_photo/
+    - assets/food/
+    - assets/counter_icons/
+    - assets/dish_info_icons/
 
   fonts:
     - family: SFProDisplay

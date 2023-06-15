@@ -1,63 +1,68 @@
-import 'dart:io';
+import 'dart:math';
+
 import 'package:cafe_app/app_config/styles.dart';
+import 'package:cafe_app/get_it_setup.dart';
 import 'package:cafe_app/routes/routes.dart';
-import 'package:cafe_app/src/main/app_navigation/app_navigation.dart';
+import 'package:cafe_app/src/main/basket/bloc/basket_bloc.dart';
+import 'package:cafe_app/src/main/categories/categories_repository.dart';
+import 'package:cafe_app/src/main/dishes/dishes_repository.dart';
+import 'package:cafe_app/src/main/user_location/cubit/user_location_cubit.dart';
 import 'package:cafe_app/utils/app_bloc_observer.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 void main() async {
-  HttpOverrides.global = MyHttpOverrides();
-  SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
   WidgetsFlutterBinding.ensureInitialized();
-  //MobileAds.instance.initialize();
-  WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
   Bloc.observer = AppBlocObserver();
-  runApp(
-    EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('ru')],
-      path: 'assets/translations',
-      fallbackLocale: const Locale('en'),
-      child: Phoenix(
-        child: const CafeApp(),
-      ),
+  Intl.defaultLocale = "ru";
+  initializeDateFormatting();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.dark,
+      statusBarColor: Colors.transparent,
     ),
   );
-}
-
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-  }
+  setupGetIt();
+  runApp(
+    const CafeApp(),
+  );
 }
 
 class CafeApp extends StatelessWidget {
   const CafeApp({Key? key}) : super(key: key);
-  /*
-  List<RepositoryProvider> getApiProviders() {
-    return [
-      RepositoryProvider(create: (_) => TokenAuthApi()),
-    ];
-  }
-*/
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: appTheme,
-      //home: const LoginNavigator(),
-      home: const AppNavigation(),
-      initialRoute: PageRoutes.appNavigation,
-      //home: const SplashScreen(),
-      routes: PageRoutes().routes(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<UserLocationCubit>(
+          create: (_) => UserLocationCubit(),
+        ),
+        BlocProvider<BasketBloc>(
+          create: (_) => BasketBloc(),
+        ),
+      ],
+      child: MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider(
+            create: (context) => const CategoriesRepository(),
+          ),
+          RepositoryProvider(
+            create: (context) => const DishesRepository(),
+          ),
+        ],
+        child: CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          theme: appTheme,
+          //home: AppNavigation(),
+          initialRoute: PageRoutes.appNavigation,
+          routes: PageRoutes().routes(),
+        ),
+      ),
     );
   }
 }

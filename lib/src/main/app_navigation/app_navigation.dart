@@ -1,71 +1,98 @@
+import 'package:cafe_app/app_config/colors.dart';
+import 'package:cafe_app/src/main/basket/bloc/basket_bloc.dart';
+import 'package:cafe_app/src/main/basket/screens/basket_screen.dart';
+import 'package:cafe_app/src/main/categories/screens/categories_screen.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AppNavigation extends StatefulWidget {
+class AppNavigation extends StatelessWidget {
   final int currentIndex;
 
   const AppNavigation({Key? key, this.currentIndex = 0}) : super(key: key);
 
   @override
-  AppNavigationState createState() => AppNavigationState();
-}
-
-class AppNavigationState extends State<AppNavigation> {
-  final List<Widget> _children = [
-    // pages
-  ];
-
-  int _currentIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.currentIndex;
-  }
-
-  final List<BottomNavigationBarItem> _bottomBarItems = [
-    const BottomNavigationBarItem(
-      icon: Icon(
-        Icons.home,
-        size: 22,
-      ),
-      label: 'Home',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.search),
-      label: 'Search',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.shopping_basket),
-      label: 'Basket',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.account_circle_outlined),
-      label: 'Account',
-    ),
-  ];
-
-  void onTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        backgroundColor: Colors.white,
-        elevation: 0.2,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Theme.of(context).hintColor,
-        items: _bottomBarItems,
-        onTap: onTap,
+    final List<BottomNavigationBarItem> _bottomBarItems = [
+      BottomNavigationBarItem(
+        icon: Image.asset(
+          'assets/bottom_navigation_bar_icons/home.png',
+        ),
+        activeIcon: Image.asset(
+          'assets/bottom_navigation_bar_icons/home.png',
+          color: primaryColor,
+        ),
+        label: 'Home',
       ),
-      body: _children[_currentIndex],
+      BottomNavigationBarItem(
+        icon:
+            Image.asset('assets/bottom_navigation_bar_icons/search-normal.png'),
+        label: 'Search',
+      ),
+      BottomNavigationBarItem(
+        icon: buildBasketIcon(false),
+        activeIcon: buildBasketIcon(true),
+        label: 'Basket',
+      ),
+      BottomNavigationBarItem(
+        icon: Image.asset(
+            'assets/bottom_navigation_bar_icons/profile-circle.png'),
+        label: 'Account',
+      ),
+    ];
+
+    return CupertinoTabScaffold(
+      tabBar: CupertinoTabBar(
+        backgroundColor: backgroundColor,
+        activeColor: primaryColor,
+        inactiveColor: hintColor,
+        items: _bottomBarItems,
+      ),
+      tabBuilder: (context, index) {
+        switch (index) {
+          case 0:
+            return CupertinoTabView(
+              builder: (context) => const CategoriesScreen(),
+            );
+          case 2:
+            return CupertinoTabView(
+              builder: (context) => const BasketScreen(),
+            );
+          default:
+            return CupertinoTabView(
+              builder: (context) => const CupertinoPageScaffold(
+                child: SizedBox.expand(),
+              ),
+            );
+        }
+      },
+    );
+  }
+
+  Widget buildBasketIcon(bool isActive) {
+    return BlocBuilder<BasketBloc, BasketState>(
+      buildWhen: (previous, current) =>
+          previous.basketDishes.length != current.basketDishes.length,
+      builder: (context, state) {
+        final icon = Image.asset(
+          'assets/bottom_navigation_bar_icons/bag.png',
+          color: isActive ? primaryColor : hintColor,
+        );
+        if (state.basketDishes.isEmpty) {
+          return icon;
+        }
+        return badges.Badge(
+          badgeContent: Text(
+            state.basketDishes.length.toString(),
+            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                  fontSize: 12.0,
+                  color: Colors.white,
+                ),
+          ),
+          child: icon,
+        );
+      },
     );
   }
 }
