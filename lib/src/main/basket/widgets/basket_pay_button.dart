@@ -30,10 +30,12 @@ class BasketPayButton extends StatelessWidget {
                   vertical: 16.0,
                 ),
                 borderRadius: BorderRadius.circular(10.0),
-                onPressed: () {},
+                onPressed: () {
+                  context.read<BasketBloc>().add(const BasketPay());
+                },
                 color: primaryColor,
                 child: Text(
-                  "Оплатить ${count} ₽",
+                  "Оплатить $count ₽",
                   style:
                       CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                             fontSize: 16.0,
