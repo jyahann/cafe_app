@@ -43,6 +43,8 @@ class BasketTile extends StatelessWidget {
                 width: 8.0,
               ),
               Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     basketModel.dish.name,
